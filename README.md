@@ -14,4 +14,8 @@ To run the game simply:
 
 `python src/main.py`
 
+![Gameboard image](Gameboard.jpg)
+
+
+
 ![Image showcasing different classes in Arkanoth Chess, highlighting various attack patterns and movements](character_classes.png)

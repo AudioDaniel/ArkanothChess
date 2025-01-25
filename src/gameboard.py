@@ -2,6 +2,8 @@ from event import subscribe
 from piece import Piece
 from square import Square
 from empty import Empty
+from pawn import Pawn
+from warrior import Warrior
 class Gameboard:
     def __init__(self,tamanho):
         self.board : list[list[Piece]] = self.load_board(tamanho)
@@ -15,6 +17,33 @@ class Gameboard:
                 row.append(Square(Empty()))
             board.append(row)
         return board
+    
+    def load_standard_pieceset(self):
+        """
+        Loads the standard set of pieces for a chess game.
+        """
+        # White pieces
+        self.place_piece(Pawn("Green"), 0, 1)
+        self.place_piece(Pawn("Green"), 1, 1)
+        self.place_piece(Pawn("Green"), 2, 1)
+        self.place_piece(Pawn("Green"), 3, 1)
+        self.place_piece(Pawn("Green"), 4, 1)
+        self.place_piece(Pawn("Green"), 5, 1)
+        self.place_piece(Pawn("Green"), 6, 1)
+        self.place_piece(Pawn("Green"), 7, 1)
+        self.place_piece(Warrior("Green"), 0, 0)
+        self.place_piece(Warrior("Green"), 7, 0)
+        # Black pieces
+        self.place_piece(Pawn("Red"), 0, 6)
+        self.place_piece(Pawn("Red"), 1, 6)
+        self.place_piece(Pawn("Red"), 2, 6)
+        self.place_piece(Pawn("Red"), 3, 6)
+        self.place_piece(Pawn("Red"), 4, 6)
+        self.place_piece(Pawn("Red"), 5, 6)
+        self.place_piece(Pawn("Red"), 6, 6)
+        self.place_piece(Pawn("Red"), 7, 6)
+        self.place_piece(Warrior("Red"), 0, 7)
+        self.place_piece(Warrior("Red"), 7, 7)
     
     def setup_piece_movement_handlers(self):
         subscribe("piece_movement", self.handle_piece_movement)

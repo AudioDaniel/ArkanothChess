@@ -6,7 +6,7 @@ from warrior import Warrior
 
 # Entry point of the program
 
-def main():
+def test():
     tableroprincipal = Gameboard(8)
     peon = Pawn('Red')
     peon2 = Pawn('Green')
@@ -18,6 +18,14 @@ def main():
     
     print(tableroprincipal)
     print("-----")
+
+def main():
+    tableroprincipal = Gameboard(8)
+    tableroprincipal.load_standard_pieceset()
+    print("\n\n\n\n")
+    print("---Arkanoth-Chess---\n")
+    print(tableroprincipal)
+    print("----------------\n")
 
 if __name__ == "__main__":
     main()
