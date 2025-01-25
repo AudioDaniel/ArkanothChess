@@ -1,7 +1,8 @@
-from pieza import Pieza
+from piece import Piece
 # Represents an empty square on the board.
-class Empty(Pieza):
+class Empty(Piece):
     def __init__(self):
         self.name = "Empty"
         self.color = "Empty"
         self.ascii_symbol = '□'
+        self.color_code = '\033[0m'

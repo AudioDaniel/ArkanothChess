@@ -1,18 +1,23 @@
-from tablero import Tablero
+from gameboard import Gameboard
 from square import Square
-from pieza import Pieza
-from peon import Peon
-from guerrero import Guerrero
+from piece import Piece
+from pawn import Pawn
+from warrior import Warrior
 
 # Entry point of the program
 
-tableroprincipal = Tablero(2)
-peon = Peon('Blanco')
+def main():
+    tableroprincipal = Gameboard(8)
+    peon = Pawn('Red')
+    peon2 = Pawn('Green')
+    tableroprincipal.place_piece(peon,0,0)
+    tableroprincipal.place_piece(peon2,2,4)
+    print(tableroprincipal)
 
-tableroprincipal.place_piece(peon,0,0)
+    peon.move(0,1)
+    
+    print(tableroprincipal)
+    print("-----")
 
-print(tableroprincipal)
-
-peon.move(0,1)
-
-print(tableroprincipal)
+if __name__ == "__main__":
+    main()

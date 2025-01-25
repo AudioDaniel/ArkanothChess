@@ -1,5 +1,5 @@
-from pieza import Pieza
-class Peon(Pieza):
+from piece import Piece
+class Pawn(Piece):
     def __init__(self, color):
         super().__init__('Peon', color)
         self.ascii_symbol = 'X'

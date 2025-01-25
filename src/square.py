@@ -1,9 +1,9 @@
-from pieza import Pieza
+from piece import Piece
 from empty import Empty
 class Square:
-    current_piece : Pieza
+    current_piece : Piece
 
-    def __init__(self,piece : Pieza):
+    def __init__(self,piece : Piece):
         self.current_piece = piece
 
     def is_occupied(self):
@@ -12,5 +12,5 @@ class Square:
         return False
     
     def __repr__(self):
-        return self.current_piece.ascii_symbol
+        return f"{self.current_piece.color_code}{self.current_piece.ascii_symbol}\033[0m"
     
