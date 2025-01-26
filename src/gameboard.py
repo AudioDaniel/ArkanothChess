@@ -8,7 +8,9 @@ class Gameboard:
     def __init__(self,tamanho):
         self.board : list[list[Piece]] = self.load_board(tamanho)
         self.setup_piece_movement_handlers()
-        
+        self.deleted_pieces : list = []
+        self.setup_piece_attack_handlers()
+
     def load_board(self,tamanho):
         board = []
         for x in range(tamanho):
@@ -44,29 +46,51 @@ class Gameboard:
         self.place_piece(Pawn("Red"), 7, 6)
         self.place_piece(Warrior("Red"), 0, 7)
         self.place_piece(Warrior("Red"), 7, 7)
+
+    def find_piece_location(self, piece: Piece):
+        """
+        Find the position of a piece on the board.
+        """
+        for i, row in enumerate(self.board):
+            for j, square in enumerate(row):
+                if square.current_piece == piece:
+                    return (i, j)
+        return None
     
     def setup_piece_movement_handlers(self):
         subscribe("piece_movement", self.handle_piece_movement)
+
+    def setup_piece_attack_handlers(self):
+        subscribe("piece_attack", self.handle_piece_attack)
         
     def handle_piece_movement(self, piece: Piece):
         """
         Reacts to a piece movement event.
         """
         # Find the current position of the piece
-        current_position = None
-        for i, row in enumerate(self.board):
-            for j, square in enumerate(row):
-                if square.current_piece == piece:
-                    current_position = (i, j)
-                    break
-            if current_position:
-                break
+        current_position = self.find_piece_location(piece)
     
         # Remove the piece from its current position
         if current_position:
             self.board[current_position[0]][current_position[1]].current_piece = Empty()
 
         # Place the piece at its new position
+        self.board[piece.y_location][piece.x_location].current_piece = piece
+    
+    def handle_piece_attack(self, piece: Piece):
+        """
+        Reacts to a piece attack event.
+        """
+        # Find the current position of the piece
+        current_position = self.find_piece_location(piece)
+
+        # Remove the piece from its current position
+        if current_position:
+            self.board[current_position[0]][current_position[1]].current_piece = Empty()
+        
+        # Place the piece at its new position
+        self.deleted_pieces.append(self.board[piece.y_location][piece.x_location].current_piece)
+
         self.board[piece.y_location][piece.x_location].current_piece = piece
 
     def place_piece(self, piece: Piece, x: int, y: int):

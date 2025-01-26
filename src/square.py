@@ -12,5 +12,4 @@ class Square:
         return False
     
     def __repr__(self):
-        return f"{self.current_piece.color_code}{self.current_piece.ascii_symbol}\033[0m"
-    
+        return f"{self.current_piece}"
