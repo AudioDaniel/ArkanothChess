@@ -1,4 +1,4 @@
-from piece import Piece
+from pieces.piece import Piece
 # Represents an empty square on the board.
 class Empty(Piece):
     def __init__(self):

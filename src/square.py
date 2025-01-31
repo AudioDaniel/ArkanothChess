@@ -1,4 +1,4 @@
-from piece import Piece
+from pieces.piece import Piece
 from empty import Empty
 class Square:
     current_piece : Piece

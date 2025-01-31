@@ -1,9 +1,9 @@
 from event import subscribe
-from piece import Piece
+from pieces.piece import Piece
 from square import Square
 from empty import Empty
-from pawn import Pawn
-from warrior import Warrior
+from pieces.pawn import Pawn
+from pieces.warrior import Warrior
 class Gameboard:
     def __init__(self,tamanho):
         self.board : list[list[Piece]] = self.load_board(tamanho)
