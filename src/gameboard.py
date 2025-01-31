@@ -1,7 +1,7 @@
 from event import subscribe
 from pieces.piece import Piece
 from square import Square
-from empty import Empty
+from pieces.empty import Empty
 from pieces.pawn import Pawn
 from pieces.warrior import Warrior
 class Gameboard:
