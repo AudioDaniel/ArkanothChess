@@ -6,6 +6,9 @@ from gameboard import Gameboard
 
 # Controls the game loop and turn order
 class TurnManager():
+    """
+    Manages the game turns, including player and computer turns, and checking win conditions.
+    """
 
     def __init__(self, gameboard: Gameboard):
         self.gameboard = gameboard
@@ -15,12 +18,19 @@ class TurnManager():
         self.winner = None
 
     def turn_loop(self):
+        """
+        The main game loop. Runs until a winner is determined.
+        """
         while self.winner == None:
             self.start_turn()
             self.win_conditions()
         print(f"Player {self.winner} wins!")
 
     def player_turn_logic(self):
+        """
+        Executes the logic for the player's turn.
+        Handles piece selection and movement/attack.
+        """
         print("Players's turn")
         piece_coords = UserInteraction.select_square("Choose a piece to move (e.g. 'A1'): ")
         piece = self.gameboard.get_piece_by_coordinates(piece_coords[0],piece_coords[1])
@@ -37,6 +47,12 @@ class TurnManager():
         piece.selected = False
 
     def move_or_attack(self,piece,destination_coords) -> bool:
+        """
+        Attempts to move or attack with a piece.
+        :param piece: The piece to move or attack with.
+        :param destination_coords: The target coordinates.
+        :return: True if the move or attack was successful, False otherwise.
+        """
         if (piece.is_valid_attack_move(destination_coords[0],destination_coords[1])):
             piece.attack(destination_coords[0],destination_coords[1])
             return True
@@ -46,6 +62,9 @@ class TurnManager():
         else : return False
 
     def start_turn(self):
+        """
+        Starts a new turn, notifying listeners and executing turn logic for player or computer.
+        """
         post_event("turn_start",self)
         for x in range(self.movs_per_turn):
             if self.player_turn:
@@ -56,6 +75,10 @@ class TurnManager():
         self.player_turn = not self.player_turn
 
     def win_conditions(self) -> bool:
+        """
+        Checks if the win conditions are met.
+        :return: True if a winner is found, False otherwise.
+        """
         if len(self.gameboard.get_pieces_by_color("Red")) == 0:
             self.winner = "Green"
             return True

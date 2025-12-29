@@ -6,6 +6,10 @@ from pieces.pawn import Pawn
 from pieces.warrior import Warrior
 class Gameboard:
     def __init__(self,tamanho):
+        """
+        Initialize the gameboard.
+        :param tamanho: Size of the board (tamanho x tamanho).
+        """
         self.board : list[list[Piece]] = self.load_board(tamanho)
         self.setup_piece_movement_handlers()
         self.setup_turn_handlers()
@@ -13,6 +17,11 @@ class Gameboard:
         self.setup_piece_attack_handlers()
 
     def load_board(self,tamanho):
+        """
+        Create the board grid with empty squares.
+        :param tamanho: Size of the board.
+        :return: A 2D list representing the board.
+        """
         board = []
         for x in range(tamanho):
             row = []
@@ -59,15 +68,28 @@ class Gameboard:
         return None
     
     def setup_piece_movement_handlers(self):
+        """
+        Subscribe to piece movement events.
+        """
         subscribe("piece_movement", self.handle_piece_movement)
 
     def setup_piece_attack_handlers(self):
+        """
+        Subscribe to piece attack events.
+        """
         subscribe("piece_attack", self.handle_piece_attack)
 
     def setup_turn_handlers(self):
+        """
+        Subscribe to turn start events.
+        """
         subscribe("turn_start", self.handle_turn_start)
 
     def handle_turn_start(self,turn_manager):
+        """
+        Handle the start of a turn by printing the board.
+        :param turn_manager: The turn manager instance (unused in this method but passed by event).
+        """
         print("--------\n")
         print(self)
         print("--------\n")
@@ -103,6 +125,12 @@ class Gameboard:
         self.board[piece.y_location][piece.x_location].current_piece = piece
 
     def place_piece(self, piece: Piece, x: int, y: int):
+        """
+        Place a piece at a specific coordinate.
+        :param piece: The piece to place.
+        :param x: The x coordinate.
+        :param y: The y coordinate.
+        """
         self.board[y][x].current_piece = piece
         piece.x_location = x
         piece.y_location = y
@@ -148,6 +176,12 @@ class Gameboard:
         return piece_at_square == Empty
     
     def is_valid_piece(self, player_color,piece) -> bool:
+        """
+        Check if a piece belongs to the player.
+        :param player_color: The color of the player.
+        :param piece: The piece to check.
+        :return: True if the piece belongs to the player, False otherwise.
+        """
         if piece == Empty:
             return False
         if piece.color != player_color:
@@ -162,6 +196,12 @@ class Gameboard:
         return piece1.color == piece2.color
 
     def get_piece_by_coordinates(self, x: int, y: int) -> Piece:
+        """
+        Get the piece at a specific coordinate.
+        :param x: The x coordinate.
+        :param y: The y coordinate.
+        :return: The piece at the given coordinates.
+        """
         return self.board[y][x].current_piece
 
     def __repr__(self):
