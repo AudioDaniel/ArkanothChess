@@ -1,9 +1,9 @@
-from event import subscribe
 from pieces.piece import Piece
 from square import Square
 from pieces.empty import Empty
 from pieces.pawn import Pawn
-from pieces.warrior import Warrior
+from exceptions.invalid_move import InvalidMoveException
+
 class Gameboard:
     def __init__(self,tamanho):
         """
@@ -11,10 +11,7 @@ class Gameboard:
         :param tamanho: Size of the board (tamanho x tamanho).
         """
         self.board : list[list[Piece]] = self.load_board(tamanho)
-        self.setup_piece_movement_handlers()
-        self.setup_turn_handlers()
         self.deleted_pieces : list = []
-        self.setup_piece_attack_handlers()
 
     def load_board(self,tamanho):
         """
@@ -43,8 +40,6 @@ class Gameboard:
         self.place_piece(Pawn("Green"), 5, 1)
         self.place_piece(Pawn("Green"), 6, 1)
         self.place_piece(Pawn("Green"), 7, 1)
-        #self.place_piece(Warrior("Green"), 0, 0)
-        #self.place_piece(Warrior("Green"), 7, 0)
         # Black pieces
         self.place_piece(Pawn("Red"), 0, 6)
         self.place_piece(Pawn("Red"), 1, 6)
@@ -54,75 +49,6 @@ class Gameboard:
         self.place_piece(Pawn("Red"), 5, 6)
         self.place_piece(Pawn("Red"), 6, 6)
         self.place_piece(Pawn("Red"), 7, 6)
-        #self.place_piece(Warrior("Red"), 0, 7)
-        #self.place_piece(Warrior("Red"), 7, 7)
-
-    def find_piece_location(self, piece: Piece):
-        """
-        Find the position of a piece on the board.
-        """
-        for i, row in enumerate(self.board):
-            for j, square in enumerate(row):
-                if square.current_piece == piece:
-                    return (i, j)
-        return None
-    
-    def setup_piece_movement_handlers(self):
-        """
-        Subscribe to piece movement events.
-        """
-        subscribe("piece_movement", self.handle_piece_movement)
-
-    def setup_piece_attack_handlers(self):
-        """
-        Subscribe to piece attack events.
-        """
-        subscribe("piece_attack", self.handle_piece_attack)
-
-    def setup_turn_handlers(self):
-        """
-        Subscribe to turn start events.
-        """
-        subscribe("turn_start", self.handle_turn_start)
-
-    def handle_turn_start(self,turn_manager):
-        """
-        Handle the start of a turn by printing the board.
-        :param turn_manager: The turn manager instance (unused in this method but passed by event).
-        """
-        print("--------\n")
-        print(self)
-        print("--------\n")
-    
-    def handle_piece_movement(self, piece: Piece):
-        """
-        Reacts to a piece movement event.
-        """
-        # Find the current position of the piece
-        current_position = self.find_piece_location(piece)
-    
-        # Remove the piece from its current position
-        if current_position:
-            self.board[current_position[0]][current_position[1]].current_piece = Empty()
-
-        # Place the piece at its new position
-        self.board[piece.y_location][piece.x_location].current_piece = piece
-    
-    def handle_piece_attack(self, piece: Piece):
-        """
-        Reacts to a piece attack event.
-        """
-        # Find the current position of the piece
-        current_position = self.find_piece_location(piece)
-
-        # Remove the piece from its current position
-        if current_position:
-            self.board[current_position[0]][current_position[1]].current_piece = Empty()
-        
-        # Place the piece at its new position
-        self.deleted_pieces.append(self.board[piece.y_location][piece.x_location].current_piece)
-
-        self.board[piece.y_location][piece.x_location].current_piece = piece
 
     def place_piece(self, piece: Piece, x: int, y: int):
         """
@@ -132,6 +58,55 @@ class Gameboard:
         :param y: The y coordinate.
         """
         self.board[y][x].current_piece = piece
+        piece.x_location = x
+        piece.y_location = y
+
+    def move_piece(self, piece: Piece, x: int, y: int):
+        """
+        Move a piece to a new location if valid.
+        """
+        if not piece.is_valid_move(x, y):
+            raise InvalidMoveException("Invalid move geometry.")
+
+        # Check if destination is empty (basic check, could be more complex)
+        if not self.is_square_empty(x, y):
+             raise InvalidMoveException("Destination is not empty.")
+
+        current_x, current_y = piece.x_location, piece.y_location
+
+        # Update board
+        self.board[current_y][current_x].current_piece = Empty()
+        self.board[y][x].current_piece = piece
+
+        # Update piece
+        piece.x_location = x
+        piece.y_location = y
+
+    def attack_piece(self, piece: Piece, x: int, y: int):
+        """
+        Attack a location with a piece.
+        """
+        if not piece.is_valid_attack_move(x, y):
+             raise InvalidMoveException("Invalid attack geometry.")
+
+        # Check if there is a piece to attack
+        if self.is_square_empty(x, y):
+            raise InvalidMoveException("No piece to attack.")
+
+        target_piece = self.get_piece_by_coordinates(x, y)
+        if self.is_piece_same_color(piece, target_piece):
+            raise InvalidMoveException("Cannot attack own piece.")
+
+        current_x, current_y = piece.x_location, piece.y_location
+        
+        # Remove victim
+        self.deleted_pieces.append(target_piece)
+
+        # Move attacker
+        self.board[current_y][current_x].current_piece = Empty()
+        self.board[y][x].current_piece = piece
+
+        # Update piece
         piece.x_location = x
         piece.y_location = y
 
@@ -154,7 +129,9 @@ class Gameboard:
         for i, row in enumerate(self.board):
             for j, square in enumerate(row):
                 if piece.is_valid_move(j, i):
-                    moves.append((j, i))
+                    # Check if destination is empty
+                    if self.is_square_empty(j, i):
+                        moves.append((j, i))
         return moves
     
     def get_available_attack_moves(self, piece: Piece) -> list[tuple[int, int]]:
@@ -165,24 +142,27 @@ class Gameboard:
         for i, row in enumerate(self.board):
             for j, square in enumerate(row):
                 if piece.is_valid_attack_move(j, i):
-                    moves.append((j, i))
+                    # Check if there is an enemy piece
+                    if not self.is_square_empty(j, i):
+                         target = self.get_piece_by_coordinates(j, i)
+                         if not self.is_piece_same_color(piece, target):
+                            moves.append((j, i))
         return moves
     
     def is_square_empty(self, x: int, y: int) -> bool:
         """
         Check if a square is empty.
         """
+        if x < 0 or x >= len(self.board[0]) or y < 0 or y >= len(self.board):
+            return False
         piece_at_square = self.board[y][x].current_piece.__class__
         return piece_at_square == Empty
     
-    def is_valid_piece(self, player_color,piece) -> bool:
+    def is_valid_piece(self, player_color, piece) -> bool:
         """
         Check if a piece belongs to the player.
-        :param player_color: The color of the player.
-        :param piece: The piece to check.
-        :return: True if the piece belongs to the player, False otherwise.
         """
-        if piece == Empty:
+        if isinstance(piece, Empty):
             return False
         if piece.color != player_color:
             return False
@@ -198,9 +178,6 @@ class Gameboard:
     def get_piece_by_coordinates(self, x: int, y: int) -> Piece:
         """
         Get the piece at a specific coordinate.
-        :param x: The x coordinate.
-        :param y: The y coordinate.
-        :return: The piece at the given coordinates.
         """
         return self.board[y][x].current_piece
 

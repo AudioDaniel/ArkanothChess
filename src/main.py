@@ -18,12 +18,12 @@ def test():
     tableroprincipal.place_piece(peonVerde2,2,0)
     print(tableroprincipal)
 
-    peonVerde.move(0,1)
+    tableroprincipal.move_piece(peonVerde, 0, 1)
     #peonRojo.move(2,3)
 
     print(tableroprincipal)
 
-    peonVerde2.attack(1,1)
+    tableroprincipal.attack_piece(peonVerde2, 1, 1)
 
     print(tableroprincipal)
     print(tableroprincipal.deleted_pieces)
