@@ -1,5 +1,6 @@
 from gameboard import Gameboard
 from random import random
+from exceptions.invalid_move import InvalidMoveException
 
 class Computer:
     """
@@ -16,13 +17,26 @@ class Computer:
         :return: True if a move was successful, False otherwise.
         """
         computer_pieces = gameboard.get_pieces_by_color("Red")
-        random_piece = computer_pieces[int(random()*len(computer_pieces))]
-        available_moves = gameboard.get_available_moves(random_piece)
-        if len(available_moves) == 0:
+        if not computer_pieces:
             return False
-        random_move = available_moves[int(random()*len(available_moves))]
-        random_piece.move(random_move[0],random_move[1])
-        return True
+
+        # Shuffle pieces to try random ones
+        import random as rand
+        rand.shuffle(computer_pieces)
+
+        for random_piece in computer_pieces:
+            available_moves = gameboard.get_available_moves(random_piece)
+            if len(available_moves) == 0:
+                continue
+
+            random_move = available_moves[int(random()*len(available_moves))]
+            try:
+                gameboard.move_piece(random_piece, random_move[0], random_move[1])
+                return True
+            except InvalidMoveException:
+                continue
+
+        return False
     
     def attack_piece_logic(self,gameboard : Gameboard) -> bool:
         """
@@ -31,18 +45,29 @@ class Computer:
         :return: True if an attack was successful, False otherwise.
         """
         computer_pieces = gameboard.get_pieces_by_color("Red")
-        random_piece = computer_pieces[int(random()*len(computer_pieces))]
-        available_moves = gameboard.get_available_attack_moves(random_piece)
-        if len(available_moves) == 0:
+        if not computer_pieces:
             return False
-        random_move = available_moves[int(random()*len(available_moves))]
-        while not self.is_valid_attack_location(gameboard,random_move[0],random_move[1],random_piece):
-            available_moves.remove(random_move)         
+
+        import random as rand
+        rand.shuffle(computer_pieces)
+
+        for random_piece in computer_pieces:
+            available_moves = gameboard.get_available_attack_moves(random_piece)
             if len(available_moves) == 0:
-                return False
+                continue
+
             random_move = available_moves[int(random()*len(available_moves))]
-        random_piece.attack(random_move[0],random_move[1])
-        return True
+
+            # The get_available_attack_moves already filters for enemy pieces in our new Gameboard logic?
+            # Let's check. Yes, I added checks there. But let's be safe.
+
+            try:
+                gameboard.attack_piece(random_piece, random_move[0], random_move[1])
+                return True
+            except InvalidMoveException:
+                continue
+
+        return False
     
     def is_valid_attack_location(self,gameboard : Gameboard, x : int, y : int,piece) -> bool:
         """
@@ -67,4 +92,4 @@ class Computer:
         if not self.attack_piece_logic(gameboard):
             if (self.move_piece_logic(gameboard)):
                 return True
-        else: return False
+        else: return True

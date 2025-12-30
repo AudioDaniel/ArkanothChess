@@ -1,6 +1,3 @@
-from event import post_event
-from exceptions.invalid_move import InvalidMoveException
-
 class Piece:
     """
     Abstract base class for all pieces.
@@ -48,30 +45,6 @@ class Piece:
             return '\033[91m'  # Red
         else:
             return '\033[0m'   # Default
-
-    def move(self, x,y):
-        """
-        Move the piece to a new position.
-        :x: x index location
-        :y: y index location
-        """
-        if not self.is_valid_move(x,y):
-            raise InvalidMoveException("Invalid move.")
-        self.x_location = x
-        self.y_location = y
-        post_event("piece_movement", self)
-
-    def attack(self, x,y):
-        """
-        Attack a piece in a position.
-        :x: x index location
-        :y: y index location
-        """
-        if not self.is_valid_attack_move(x,y):
-            raise InvalidMoveException("Invalid attack move.")
-        self.x_location = x
-        self.y_location = y
-        post_event("piece_attack", self)
 
     def is_valid_move(self,x,y) -> bool:
         """
