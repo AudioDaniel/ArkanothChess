@@ -185,11 +185,28 @@ class Gameboard:
         return self.__str__()
     
     def __str__(self):
-        rep : str = ""
-        for row in reversed(self.board):
+        tamanho = len(self.board)
+        rep = ""
+
+        # Top border
+        rep += "   +" + "---+" * tamanho + "\n"
+
+        for y in range(tamanho - 1, -1, -1):
+            row = self.board[y]
+            # Row number
+            rep += f" {y + 1} |"
             for column in row:
-                rep+=(column.__repr__()) + " "
-            rep+=('\n')
+                rep += f" {column.__repr__()} |"
+            rep += "\n"
+            # Row separator
+            rep += "   +" + "---+" * tamanho + "\n"
+
+        # Column labels
+        rep += "    "
+        for x in range(tamanho):
+            rep += f" {chr(ord('A') + x)}  "
+        rep += "\n"
+
         return rep
         
     def __getitem__(self, x):
